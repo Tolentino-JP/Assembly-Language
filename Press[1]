@@ -1,0 +1,228 @@
+.model small
+
+.data
+    message db 'Press[1]: 1 digit operation $'
+    message2 db 'Press[2]: 2 digit operation $'
+    message3 db 'Press any key to Exit $'
+    message4 db 'You pressed $'
+    message5 db 'Press any key to go back to main menu $'
+    enternum db 'Enter a number: $'
+    chose1 db 'You chose addition $'
+    chose2 db 'You chose subtraction $'
+    operation1 db 'Press[1]: Addition $'
+    operation2 db 'Press[2]: Subtraction $'
+    note db 'Negative number is not acceptable $'
+    sum db 'The sum is $'
+    difference db 'The difference is $'
+    again db 'Do you want to do another operation again?? $'
+    again2 db 'Press[1]: YES $'
+    newline db 0ah,0dh, ' $'
+    input db 0
+    num1 db 0
+    num2 db 0
+    final db 0
+    
+.code
+
+main: ;Garbage
+    mov ax,@data 
+    mov ds,ax
+start:
+    ;print shits
+    mov input,0
+    call line
+    mov ah,09h
+    mov dx,offset message 
+    int 21h
+    call line
+    mov dx,offset message2 
+    int 21h
+    call line
+    mov dx,offset message3 
+    int 21h
+    ;input
+    mov ah,07h
+    int 21h
+    mov input,al
+    call line
+    mov ah,09h
+    mov dx,offset message4
+    int 21h
+    mov ah,02h
+    mov dl,input
+    int 21h
+    call line
+    call line
+    jmp any
+loop_start:
+    loop start
+    
+any: ;compare
+    cmp input,'1'
+    jl exit1
+    cmp input,'2'
+    jg exit1
+    
+    ;input nums
+    mov ah,09h
+    mov dx,offset enternum
+    int 21h
+    
+    mov ah,01h
+    int 21h
+    mov num1,al
+    
+    call line
+    
+    mov ah,09h
+    mov dx,offset enternum
+    int 21h
+    
+    mov ah,01h
+    int 21h
+    mov num2,al
+    call line
+    call line
+    
+    jmp continue1
+    
+exit1:  ;exit extendion
+    jmp exit2
+
+continue1:
+    mov ah,09h
+    mov dx,offset operation1
+    int 21h
+    call line
+    mov dx,offset operation2
+    int 21h
+    call line
+    mov dx,offset message5
+    int 21h
+    call line
+    
+    ;input
+    mov ah,07h
+    int 21h
+    mov input,al
+    cmp input,'1'
+    jl loop_start
+    je addition
+    cmp input,'2'
+    jg loop_start
+    je subtract
+    
+ewan:  ;addtion subtract call
+    call question
+    jmp exit2
+    
+line:   ;newline
+    mov ah,09h
+    mov dx,offset newline
+    int 21h
+    ret
+subtract:   ;subtract
+    mov bl,num1
+    sub bl,num2
+    add bl,48
+    mov final, bl
+    call line
+    cmp final,'0'
+    jl error
+    mov ah,09h
+    mov dx,offset chose2
+    int 21h
+    call line
+    mov dx,offset difference
+    int 21h
+    mov ah,02h
+    mov dl,final
+    int 21h
+now:    ; now para sa return ng negative
+    
+    jmp ewan    ;return
+dito:
+    call loop_start
+addition:
+    mov bl,num1
+    add bl,num2
+    sub bl,48
+    mov final,bl
+    call line
+    call one
+    mov ah,09h
+    mov dx,offset chose1
+    int 21h
+    call line
+    mov dx,offset sum
+    int 21h
+    mov ah,02h
+    mov dl,final
+    int 21h
+return_one:
+    jmp ewan
+    
+error:
+    call line
+    mov ah,09h
+    mov dx,offset note
+    int 21h
+    jmp now     ;return
+
+question:
+    call line
+    call line
+    mov ah,09h
+    mov dx,offset again
+    int 21h
+    call line
+    mov dx,offset again2
+    int 21h
+    call line    
+    mov dx,offset message3
+    int 21h
+    call line
+    mov ah,07h
+    int 21h
+    cmp al,49
+    je dito         ;call the extension to top
+    jmp exit2
+one:
+    cmp final,'9'
+    jg two
+back:
+    jmp return_one       ;return 
+two:
+    mov cl,final
+    sub cl,10
+    
+    mov ah,09h
+    mov dx,offset chose1
+    int 21h
+    call line
+    mov dx,offset sum
+    int 21h
+    mov ah,02h
+    mov dl,'1'
+    int 21h
+    mov dl,cl
+    int 21h
+    jmp back
+    
+exit2:
+    mov ah,4ch
+    int 21h
+
+
+end main
+
+
+;negative:
+;    mov bl,final
+;    add bl,10
+;    mov final,bl
+;    mov ah,02h
+;    mov dl,'-'
+;    int 21h
+;    mov dl,final
+;    int 21h
