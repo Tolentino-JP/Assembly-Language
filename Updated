@@ -20,7 +20,10 @@
     input db 0
     num1 db 0
     num2 db 0
+    num3 db 0
+    num4 db 0
     final db 0
+    double db 0
     
 .code
 
@@ -54,7 +57,9 @@ start:
     call line
     call line
     jmp any
+    
 loop_start:         ;extension of loop
+
     loop start
     
 any:                ;compare and extension
@@ -65,6 +70,8 @@ any:                ;compare and extension
     jg exit1
     
     call two_digits
+    cmp double,'J'
+    je continue1
     
     ;input nums
     mov ah,09h
@@ -261,19 +268,62 @@ two_digits:
     jl two_digit_balik
     jg two_digit_balik
     
+    mov ah,09h
+    mov dx,offset enternum
+    int 21h
     
+    mov ah,01h
+    int 21h
+    mov num1,al     ;num1
+    mov ah,01h
+    int 21h
+    mov num2,al     ;num2
+    
+    call line
+    
+    mov ah,09h
+    mov dx,offset enternum
+    int 21h
+    
+    mov ah,01h
+    int 21h
+    mov num3,al     ;num3
+    mov ah,01h
+    int 21h
+    mov num4,al     ;num4
+    
+    call line
+    call line
+    
+    jmp two_add
     
 
 two_digit_balik:
 
     ret
+
+two_add:
+    mov bl,num2
+    add bl,num4
+    sub bl,48
+    sub bl,12
     
+    cmp bl,'9'
+    jg two
+    
+    mov dl,num1
+    sub dl,num3
+    add dl,48
+    
+    mov double,'J'
+    jmp two_digit_balik
+
 exit2:
 
     mov ah,4ch
     int 21h
 
-
+    
 end main
 
 
