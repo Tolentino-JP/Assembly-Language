@@ -314,10 +314,12 @@ two_digit_balik:
 
     ret
 
-two_operation:
+two_operation:        ;hold the press[2] operation
     
     cmp input,'1'
     je double_add
+    cmp input,'2'
+    je double_sub
     
     
 balik:
@@ -375,6 +377,53 @@ double_three:
     int 21h
     
     jmp double_return2
+    
+double_sub:      ;double digit subtraction
+    mov bl,num1
+    cmp bl,num3
+    jl error1
+    
+    jmp next
+error1:
+    call error
+    
+next:
+    mov ah,09h
+    mov dx,offset difference
+    int 21h
+    
+    mov bl,num2
+    sub bl,num4
+    add bl,48
+    mov digit2,bl
+    
+    mov cl,num1
+    sub cl,num3
+    add cl,48
+    mov digit1,cl
+    
+    cmp digit2,'0'
+    jl double_negative
+    
+    cmp digit1,'0'
+    jl error1
+    
+balik2:
+    
+    mov ah,02h
+    mov dl,digit1
+    int 21h
+    mov dl,digit2
+    int 21h
+    
+    jmp balik   ;back to 2 digit operation
+    
+double_negative:
+    
+    add digit2,10
+    sub digit1,1
+    
+    jmp balik2
     
 remove_value:
     mov digit1,'0'
