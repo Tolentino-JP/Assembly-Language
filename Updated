@@ -18,19 +18,24 @@
     again2 db 'Press[1]: YES $'
     newline db 0ah,0dh, ' $'
     input db 0
+    input2 db 0
     num1 db 0
     num2 db 0
     num3 db 0
     num4 db 0
     final db 0
     double db 0
+    digit1 db 0
+    digit2 db 0
+    digit3 db 0
+    
     
 .code
 
 main: ;Garbage
     mov ax,@data 
     mov ds,ax
-start:
+start PROC NEAR
     ;print shits
     mov input,0
     call line
@@ -70,6 +75,7 @@ any:                ;compare and extension
     jg exit1
     
     call two_digits
+    
     cmp double,'J'
     je continue1
     
@@ -123,13 +129,20 @@ continue1:
     int 21h
     mov input,al
     
+    cmp double,'J'
+    je two_extension
+    
     cmp input,'1'
     jl loop_start
-    je addition
+    je single_addition
     
     cmp input,'2'
     jg loop_start
-    je subtract
+    je single_subtract
+
+two_extension:
+    
+    call two_operation
     
 ewan:  ;addtion subtract call
 
@@ -144,7 +157,7 @@ line:   ;newline
     
     ret
     
-subtract:   ;subtract
+single_subtract:   ;subtract
 
     mov bl,num1
     sub bl,num2
@@ -176,7 +189,7 @@ dito:
 
     call loop_start
     
-addition:
+single_addition:
 
     mov bl,num1
     add bl,num2
@@ -263,7 +276,7 @@ two:
     
     jmp back
 
-two_digits:
+two_digits:     ;input 2 digit
     cmp input,'2'
     jl two_digit_balik
     jg two_digit_balik
@@ -295,28 +308,80 @@ two_digits:
     call line
     call line
     
-    jmp two_add
-    
+    mov double,'J'
 
 two_digit_balik:
 
     ret
 
-two_add:
-    mov bl,num2
-    add bl,num4
+two_operation:
+    
+    cmp input,'1'
+    je double_add
+    
+    
+balik:
+    call remove_value
+    ret
+    
+double_add:
+    mov ah,09h
+    mov dx,offset sum
+    int 21h
+    
+    mov cl,num2
+    add cl,num4
+    sub cl,48
+    mov digit3,cl
+    
+    mov bl,num1
+    add bl,num3
     sub bl,48
-    sub bl,12
+    mov digit2,bl
     
-    cmp bl,'9'
-    jg two
+    cmp digit3,'9'
+    jg double_two
     
-    mov dl,num1
-    sub dl,num3
-    add dl,48
+double_return:          ;return double digits
     
-    mov double,'J'
-    jmp two_digit_balik
+    cmp digit2,'9'
+    jg double_three
+    
+double_return2:
+    
+    mov ah,02h
+    mov dl,digit2
+    int 21h
+    mov dl,digit3
+    int 21h
+    
+    jmp balik     ;not done yet error loop
+
+double_two:
+    
+    add digit2,1
+    sub digit3,10
+    jmp double_return
+
+double_three:
+    
+    mov bl,'0'
+    add bl,1
+    mov digit1,bl
+    sub digit2,10
+    
+    mov ah,02h
+    mov dl,digit1
+    int 21h
+    
+    jmp double_return2
+    
+remove_value:
+    mov digit1,'0'
+    mov digit2,'0'
+    mov digit3,'0'
+    
+    ret
 
 exit2:
 
