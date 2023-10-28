@@ -35,8 +35,9 @@
 main: ;Garbage
     mov ax,@data 
     mov ds,ax
-start PROC NEAR
-    ;print shits
+start PROC NEAR     ;print shits
+    mov double,0
+    call clear
     mov input,0
     call line
     mov ah,09h
@@ -53,6 +54,8 @@ start PROC NEAR
     int 21h
     mov input,al
     call line
+    call clear
+    call line
     mov ah,09h
     mov dx,offset message4
     int 21h
@@ -68,6 +71,7 @@ loop_start:         ;extension of loop
     loop start
     
 any:                ;compare and extension
+    
     cmp input,'1'
     jl exit1
     
@@ -133,13 +137,16 @@ continue1:
     je two_extension
     
     cmp input,'1'
-    jl loop_start
+    jl loop_start1
     je single_addition
     
     cmp input,'2'
-    jg loop_start
+    jg loop_start1
     je single_subtract
-
+    
+loop_start1:
+    call loop_start
+    
 two_extension:
     
     call two_operation
@@ -186,7 +193,6 @@ now:    ; now para sa return ng negative
     jmp ewan    ;return
     
 dito:
-
     call loop_start
     
 single_addition:
@@ -223,7 +229,6 @@ error:
     jmp now     ;return
 
 question:
-
     call line
     call line
     
@@ -432,6 +437,18 @@ remove_value:
     
     ret
 
+clear:
+    mov ah,00h
+    mov al,02
+    int 10h
+    
+    ret
+
+delay:
+    dec cx
+    jnz delay
+    ret
+    
 exit2:
 
     mov ah,4ch
