@@ -1,0 +1,491 @@
+.model small
+
+.data
+    message db 'Press[1]: 1 digit operation $'
+    message2 db 'Press[2]: 2 digit operation $'
+    message3 db 'Press any key to Exit $'
+    message4 db 'You pressed $'
+    message5 db 'Press any key to go back to main menu $'
+    enternum db 'Enter a number: $'
+    chose1 db 'You chose addition $'
+    chose2 db 'You chose subtraction $'
+    operation1 db 'Press[1]: Addition $'
+    operation2 db 'Press[2]: Subtraction $'
+    note db 'Negative number is not acceptable $'
+    sum db 'The sum is $'
+    difference db 'The difference is $'
+    again db 'Do you want to do another operation again?? $'
+    again2 db 'Press[1]: YES $'
+    newline db 0ah,0dh, ' $'
+    input db 0
+    input2 db 0
+    num1 db 0
+    num2 db 0
+    num3 db 0
+    num4 db 0
+    final db 0
+    double db 0
+    digit1 db 0
+    digit2 db 0
+    digit3 db 0
+    
+    
+.code
+
+main: ;Garbage
+    mov ax,@data 
+    mov ds,ax
+start PROC NEAR     ;print shits
+    mov double,0
+    call clear
+    mov input,0
+    call line
+    mov ah,09h
+    mov dx,offset message 
+    int 21h
+    call line
+    mov dx,offset message2 
+    int 21h
+    call line
+    mov dx,offset message3 
+    int 21h
+    ;input
+    mov ah,07h
+    int 21h
+    mov input,al
+    call line
+    call clear
+    call line
+    mov ah,09h
+    mov dx,offset message4
+    int 21h
+    mov ah,02h
+    mov dl,input
+    int 21h
+    call line
+    call line
+    jmp any
+    
+loop_start:         ;extension of loop
+
+    loop start
+    
+any:                ;compare and extension
+    
+    cmp input,'1'
+    jl exit1
+    
+    cmp input,'2'
+    jg exit1
+    
+    call two_digits
+    
+    cmp double,'J'
+    je continue1
+    
+    ;input nums
+    mov ah,09h
+    mov dx,offset enternum
+    int 21h
+    
+    mov ah,01h
+    int 21h
+    mov num1,al
+    
+    call line
+    
+    mov ah,09h
+    mov dx,offset enternum
+    int 21h
+    
+    mov ah,01h
+    int 21h
+    mov num2,al
+    
+    call line
+    call line
+    
+    jmp continue1
+    
+exit1:                  ;exit extendion
+    
+    call exit2
+    
+continue1:
+
+    mov ah,09h
+    mov dx,offset operation1
+    int 21h
+    
+    call line
+    
+    mov dx,offset operation2
+    int 21h
+    
+    call line
+    
+    mov dx,offset message5
+    int 21h
+    call line
+    
+    ;input
+    mov ah,07h
+    int 21h
+    mov input,al
+    
+    cmp double,'J'
+    je two_extension
+    
+    cmp input,'1'
+    jl loop_start1
+    je single_addition
+    
+    cmp input,'2'
+    jg loop_start1
+    je single_subtract
+    
+loop_start1:
+    call loop_start
+    
+two_extension:
+    
+    call two_operation
+    
+ewan:  ;addtion subtract call
+
+    call question
+    jmp exit2
+    
+line:   ;newline
+
+    mov ah,09h
+    mov dx,offset newline
+    int 21h
+    
+    ret
+    
+single_subtract:   ;subtract
+
+    mov bl,num1
+    sub bl,num2
+    add bl,48
+    mov final, bl
+    
+    call line
+    
+    mov ah,09h
+    mov dx,offset chose2
+    int 21h
+    
+    call line
+    
+    mov dx,offset difference
+    int 21h
+    
+    cmp final,'0'
+    jl negative_to
+    
+negative_subtractReturn:
+    mov ah,02h
+    mov dl,final
+    int 21h
+    
+now:    ; now para sa return ng negative
+    
+    jmp ewan    ;return
+    
+dito:
+    call loop_start
+    
+single_addition:
+
+    mov bl,num1
+    add bl,num2
+    sub bl,48
+    mov final,bl
+    
+    call line
+    
+    call one
+    
+    mov ah,09h
+    mov dx,offset chose1
+    int 21h
+    call line
+    mov dx,offset sum
+    int 21h
+    mov ah,02h
+    mov dl,final
+    int 21h
+    
+return_one:
+
+    jmp ewan
+    
+negative_to:
+    mov ah,02h
+    mov dl,'-'
+    int 21h
+    
+    mov bl,num2
+    sub bl,num1
+    add bl,48
+    mov final,bl
+    
+    jmp negative_subtractReturn
+error:
+
+    call line
+    mov ah,09h
+    mov dx,offset note
+    int 21h
+    jmp now     ;return
+
+question:
+    call line
+    call line
+    
+    mov ah,09h
+    mov dx,offset again
+    int 21h
+    
+    call line
+    
+    mov dx,offset again2
+    int 21h
+    call line    
+    mov dx,offset message3
+    int 21h
+    call line
+    mov ah,07h
+    int 21h
+    
+    cmp al,49
+    je dito         ;call the extension to top
+    jmp exit2
+    
+one:
+
+    cmp final,'9'
+    jg two
+    
+    ret
+    
+back:
+
+    jmp return_one       ;return 
+    
+two:
+    mov cl,final
+    sub cl,10
+    
+    mov ah,09h
+    mov dx,offset chose1
+    int 21h
+    call line
+    mov dx,offset sum
+    int 21h
+    
+    mov ah,02h
+    mov dl,'1'
+    int 21h
+    mov dl,cl
+    int 21h
+    
+    jmp back
+
+two_digits:     ;input 2 digit
+    cmp input,'2'
+    jl two_digit_balik
+    jg two_digit_balik
+    
+    mov ah,09h
+    mov dx,offset enternum
+    int 21h
+    
+    mov ah,01h
+    int 21h
+    mov num1,al     ;num1
+    mov ah,01h
+    int 21h
+    mov num2,al     ;num2
+    
+    call line
+    
+    mov ah,09h
+    mov dx,offset enternum
+    int 21h
+    
+    mov ah,01h
+    int 21h
+    mov num3,al     ;num3
+    mov ah,01h
+    int 21h
+    mov num4,al     ;num4
+    
+    call line
+    call line
+    
+    mov double,'J'
+
+two_digit_balik:
+
+    ret
+
+two_operation:        ;hold the press[2] operation
+    
+    cmp input,'1'
+    je double_add
+    cmp input,'2'
+    je double_sub
+    
+    
+balik:
+    call remove_value
+    ret
+    
+double_add:
+    mov ah,09h
+    mov dx,offset sum
+    int 21h
+    
+    mov cl,num2
+    add cl,num4
+    sub cl,48
+    mov digit3,cl
+    
+    mov bl,num1
+    add bl,num3
+    sub bl,48
+    mov digit2,bl
+    
+    cmp digit3,'9'
+    jg double_two
+    
+double_return:          ;return double digits
+    
+    cmp digit2,'9'
+    jg double_three
+    
+double_return2:
+    
+    mov ah,02h
+    mov dl,digit2
+    int 21h
+    mov dl,digit3
+    int 21h
+    
+    jmp balik     ;not done yet error loop
+
+double_two:
+    
+    add digit2,1
+    sub digit3,10
+    jmp double_return
+
+double_three:
+    
+    mov bl,'0'
+    add bl,1
+    mov digit1,bl
+    sub digit2,10
+    
+    mov ah,02h
+    mov dl,digit1
+    int 21h
+    
+    jmp double_return2
+    
+double_sub:      ;double digit subtraction
+    
+    mov ah,09h
+    mov dx,offset difference
+    int 21h
+    
+    mov bl,num2
+    sub bl,num4
+    add bl,48
+    mov digit2,bl
+    
+    mov cl,num1
+    sub cl,num3
+    add cl,48
+    mov digit1,cl
+    
+    cmp digit1,'0'
+    jl two_negative
+    
+    cmp digit2,'0'
+    jl double_negative
+    
+balik2:
+    
+    mov ah,02h
+    mov dl,digit1
+    int 21h
+    mov dl,digit2
+    int 21h
+    
+    jmp balik   ;back to 2 digit operation
+    
+double_negative:
+    
+    add digit2,10
+    sub digit1,1
+    
+    jmp balik2
+    
+two_negative:
+    
+    mov ah,02h
+    mov dl,'-'
+    int 21h
+    
+    mov bl,num3
+    sub bl,num1
+    mov digit1,bl
+    add digit1,48
+    mov bl,num4
+    sub bl,num2
+    mov digit2,bl
+    add digit2,48
+    
+    jmp balik2
+    
+remove_value:
+    mov digit1,'0'
+    mov digit2,'0'
+    mov digit3,'0'
+    
+    ret
+
+clear:
+    mov ah,00h
+    mov al,02
+    int 10h
+    
+    ret
+
+delay:
+    dec cx
+    jnz delay
+    ret
+    
+exit2:
+
+    mov ah,4ch
+    int 21h
+
+    
+end main
+
+
+;negative:
+;    mov bl,final
+;    add bl,10
+;    mov final,bl
+;    mov ah,02h
+;    mov dl,'-'
+;    int 21h
+;    mov dl,final
+;    int 21h
